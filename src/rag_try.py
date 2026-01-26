@@ -1,4 +1,6 @@
 from pdf_load import load_pdfs
+from vector_store import build_vectorstore, search
+from sentence_transformers import SentenceTransformer
 
 def chunk_text(text, chunk_size=300, overlap=50):
     words = text.split()
@@ -15,6 +17,22 @@ def chunk_text(text, chunk_size=300, overlap=50):
 docs = load_pdfs("data/raw")
 
 all_chunks = []
+
+clean_chunks = []
+
+for c in all_chunks:
+    if c.count("|") > 5:
+        continue
+    if c.count("C1") > 2:
+        continue
+    if len(c) < 100:
+        continue
+    clean_chunks.append(c)
+
+print(f"Clean chunkovi: {len(clean_chunks)}")
+
+print(len(all_chunks))
+print(len(clean_chunks))
 
 for doc in docs:
     chunks = chunk_text(doc)
@@ -41,4 +59,17 @@ for chunk in all_chunks:
 
     if found == 3:
         break
+
+
+index, embeddings, chunks = build_vectorstore(chunks)
+
+model = SentenceTransformer("all-MiniLM-L6-v2")
+
+query = "benign prostatic hyperplasia"
+results = search(query, model, index, chunks)
+
+print("\n Rezultati:\n")
+for r in results:
+    print(r[:500])
+    print("-" * 80)
 
