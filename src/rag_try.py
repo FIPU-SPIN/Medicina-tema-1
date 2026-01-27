@@ -14,9 +14,19 @@ def chunk_text(text, chunk_size=300, overlap=50):
 
     return chunks
 
+
 docs = load_pdfs("data/raw")
 
+print("Ukupan broj tekstualnih blokova (PDF stranica):", len(docs))
+
+
 all_chunks = []
+
+for doc in docs:
+    chunks = chunk_text(doc)
+    all_chunks.extend(chunks)
+
+print("Ukupan broj chunkova:", len(all_chunks))
 
 clean_chunks = []
 
@@ -31,45 +41,23 @@ for c in all_chunks:
 
 print(f"Clean chunkovi: {len(clean_chunks)}")
 
-print(len(all_chunks))
-print(len(clean_chunks))
+print("Primjer clean chunkova:")
 
-for doc in docs:
-    chunks = chunk_text(doc)
-    all_chunks.extend(chunks)
+for i, c in enumerate(clean_chunks[:3]):
+    print(f"CHUNK {i+1}:\n")
+    print(c[:1000])
+    print("\n" + "-" * 80 + "\n")
 
-print("Ukupan broj chunkova:", len(all_chunks))
+keywords = ["benign", "prostatic", "hyperplasia"]
 
-print("Ukupan broj tekstualnih blokova:", len(docs))
-print("\nPrimjer:\n")
-print(docs[0][:1000])
-
-keywords = ["prostatic", "hyperplasia"]
-
-print("\nRezultati:\n")
+print("Kljucne rijeci:")
 
 found = 0
-
-for chunk in all_chunks:
-    chunk_lower = chunk.lower()
-    if all(k in chunk_lower for k in keywords):
-        print(chunk)
-        print("\n" + "-"*80 + "\n")
+for c in clean_chunks:
+    cl = c.lower()
+    if all(k in cl for k in keywords):
+        print(c[:1000])
+        print("\n" + "-" * 80 + "\n")
         found += 1
-
     if found == 3:
         break
-
-
-index, embeddings, chunks = build_vectorstore(chunks)
-
-model = SentenceTransformer("all-MiniLM-L6-v2")
-
-query = "benign prostatic hyperplasia"
-results = search(query, model, index, chunks)
-
-print("\n Rezultati:\n")
-for r in results:
-    print(r[:500])
-    print("-" * 80)
-
