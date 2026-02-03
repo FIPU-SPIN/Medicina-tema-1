@@ -1,11 +1,10 @@
-def chunk_text(text, chunk_size=500, overlap=100):
+def chunk_text(text, chunk_size=300, overlap=50):
+    words = text.split()
     chunks = []
-    start = 0
+    i = 0
 
-    while start < len(text):
-        end = start + chunk_size
-        chunk = text[start:end]
-        chunks.append(chunk)
-        start += chunk_size - overlap
-
+    while i < len(words):
+        chunk = words[i:i + chunk_size]
+        chunks.append(" ".join(chunk))
+        i += chunk_size - overlap
     return chunks

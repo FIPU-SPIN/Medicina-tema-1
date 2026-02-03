@@ -9,7 +9,7 @@ def load_pdfs(path):
             pdf_path = os.path.join(path, file)
             reader = PdfReader(pdf_path)
 
-    for page in reader.pages:
+            for page in reader.pages:
                 text = page.extract_text()
                 if text:
                     cleaned = " ".join(text.split())
