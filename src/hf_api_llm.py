@@ -45,13 +45,15 @@ Definicija:"""
                 model=self.model,
                 messages=messages,
                 max_tokens=200,
-                temperature=0.2,
+                temperature=0.1,
             )
+
+            return completion.choices[0].message.content.strip()
             
-            if hasattr(completion, 'choices') and len(completion.choices) > 0:
-                return completion.choices[0].message["content"].strip()
-            else:
-                raise Exception("No response content received from model")
+           # if hasattr(completion, 'choices') and len(completion.choices) > 0:
+                # return completion.choices[0].message["content"].strip()
+            # else:
+                # raise Exception("No response content received from model")
         
         except Exception as e:
             print(f"⚠️ Primary model not available ({self.model}): {e}")
@@ -61,13 +63,15 @@ Definicija:"""
                 model=self.fallback_model,
                 messages=messages,
                 max_tokens=200,
-                temperature=0.2,
+                temperature=0.1,
             )
             
-            if hasattr(completion, 'choices') and len(completion.choices) > 0:
-                return completion.choices[0].message["content"].strip()
-            else:
-                raise Exception("No response content received from fallback model")
+            return completion.choices[0].message.content.strip()
+            
+            #if hasattr(completion, 'choices') and len(completion.choices) > 0:
+                # return completion.choices[0].message["content"].strip()
+            # else:
+                # raise Exception("No response content received from fallback model")
 
 
 _generator = MedicalDefinitionGenerator()

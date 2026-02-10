@@ -14,7 +14,12 @@ model = SentenceTransformer("all-MiniLM-L6-v2")
 index, embeddings, chunks_for_index = build_vectorstore(clean_chunks)
 
 def rag_query(user_input, top_k=5):
-    top_chunks = search(user_input, model, index, chunks_for_index)[:top_k]
+    top_chunks, scores = search(user_input, model, index, chunks_for_index)[:top_k]
+
+    # thresholding
+    if scores[0] < 0.35:
+        return "No sufficinet information found."
+
     top_chunks_text = "\n\n".join(top_chunks)
     definition = generate_definition(top_chunks_text, user_input)
     return definition

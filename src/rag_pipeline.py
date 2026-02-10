@@ -25,25 +25,28 @@ def rag_generate_definition(query, pdf_folder="data/raw", top_k=10):
 
     clean_chunks = []
     for c in all_chunks:
-        if c.count("|") > 5:       
-         continue
-        if c.count("C1") > 2:      
-         continue
-        if len(c) < 100:           
-         continue
+        if c.count("|") > 5 or c.count("C1") > 2 or len(c) < 100:
+            continue
 
         c = re.sub(r"\s+", " ", c)
         c = re.sub(r"[^a-zA-Z0-9 .,]", "", c)
         clean_chunks.append(c)
     print(f"Number of clean chunks: {len(clean_chunks)}")
 
+    if not clean_chunks:
+        return "No valid text chunks found in the provided PDF."
+    
     model = SentenceTransformer("all-MiniLM-L6-v2")
     index, embeddings, chunks_for_index = build_vectorstore(clean_chunks)
     print("Vector store created.")
 
     top_chunks_with_dist = search(query, model, index, chunks_for_index, k=top_k)
-    top_chunks = [c for c, dist in top_chunks_with_dist if dist < 0.85]
-    top_chunks_text = "\n\n".join(top_chunks)
+    # top_chunks = [c for c, dist in top_chunks_with_dist if dist < 0.85]
+    filtered = [(c, dist) for c, dist in top_chunks_with_dist if dist < 0.85]
+
+    if not filtered:
+       return "No relevant clinical context found for this term."
+    
     prompt = f"""
     You are a medical expert in urology.
 
@@ -59,6 +62,8 @@ def rag_generate_definition(query, pdf_folder="data/raw", top_k=10):
 
     Definition:
     """
+
+    # definition = generate_definition(prompt)
 
     definition = generate_definition(prompt)
 
