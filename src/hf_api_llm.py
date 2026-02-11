@@ -22,12 +22,12 @@ class MedicalDefinitionGenerator:
                      Do not use bullet points or lists. 
                      Keep it brief and to the point.
 
-Pojam: {term}
+Term: {term}
 
 Tekst:
 {chunk}
 
-Definicija:"""
+Definition:"""
 
         messages = [
             {
@@ -48,16 +48,16 @@ Definicija:"""
                 temperature=0.1,
             )
 
-            return completion.choices[0].message.content.strip()
+            #return completion.choices[0].message.content.strip()
             
-           # if hasattr(completion, 'choices') and len(completion.choices) > 0:
-                # return completion.choices[0].message["content"].strip()
-            # else:
-                # raise Exception("No response content received from model")
+            if hasattr(completion, 'choices') and len(completion.choices) > 0:
+                return completion.choices[0].message.content.strip()
+            else:
+                 raise Exception("No response content received from model")
         
         except Exception as e:
-            print(f"⚠️ Primary model not available ({self.model}): {e}")
-            print(f"⚠️ Using fallback model: {self.fallback_model}")
+            print(f"Primary model not available ({self.model}): {e}")
+            print(f"Using fallback model: {self.fallback_model}")
            
             completion = self.client.chat.completions.create(
                 model=self.fallback_model,
@@ -66,13 +66,12 @@ Definicija:"""
                 temperature=0.1,
             )
             
-            return completion.choices[0].message.content.strip()
+            #return completion.choices[0].message.content.strip()
             
-            #if hasattr(completion, 'choices') and len(completion.choices) > 0:
-                # return completion.choices[0].message["content"].strip()
-            # else:
-                # raise Exception("No response content received from fallback model")
-
+            if hasattr(completion, 'choices') and len(completion.choices) > 0:
+                return completion.choices[0].message["content"].strip()
+            else:
+                raise Exception("No response content received from fallback model")
 
 _generator = MedicalDefinitionGenerator()
 
@@ -80,7 +79,7 @@ def generate_definition(chunk, term):
     return _generator.generate_definition(chunk, term)
 
 if __name__ == "__main__":
-    test_chunk = "Benign prostatic hyperplasia (BPH) je stanje kod starijih muškaraca gdje se prostata povećava i može uzrokovati probleme s mokrenjem."
+    test_chunk = "Benign prostatic hyperplasia (BPH) is a condition in older men where the prostate enlarges and can cause problems with urination."
     term = "Benign prostatic hyperplasia"
     definition = generate_definition(test_chunk, term)
-    print("Definicija:\n", definition)
+    print("Definition:\n", definition)

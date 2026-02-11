@@ -3,9 +3,8 @@ from chunkovi import chunk_text
 from vector_store import build_vectorstore, search
 from hf_api_llm import generate_definition
 from sentence_transformers import SentenceTransformer
-import re
 
-def rag_generate_definition(query, pdf_folder="data/raw", top_k=10):
+def rag_generate_definition(query, pdf_folder="data/raw", top_k=5):
     """
     Input:
         query: str - the term to search for
@@ -14,62 +13,35 @@ def rag_generate_definition(query, pdf_folder="data/raw", top_k=10):
     Output:
         definition: str - generated definition from LLM
     """
+    if __name__ == "__main__":
+        query = "Benign prostatic hyperplasia"
+        definition = rag_generate_definition(query)
+        print(f"\nDefinition for '{query}':\n{definition}")
+
+
     docs = load_pdfs(pdf_folder)
     print(f"Total PDF pages loaded: {len(docs)}")
 
     all_chunks = []
     for doc in docs:
-        chunks = chunk_text(doc, chunk_size=400, overlap=100)
+        chunks = chunk_text(doc)
         all_chunks.extend(chunks)
     print(f"Total number of chunks: {len(all_chunks)}")
 
     clean_chunks = []
     for c in all_chunks:
-        if c.count("|") > 5 or c.count("C1") > 2 or len(c) < 100:
+        if c.count("|") > 5:       
             continue
-
-        c = re.sub(r"\s+", " ", c)
-        c = re.sub(r"[^a-zA-Z0-9 .,]", "", c)
+        if c.count("C1") > 2:      
+            continue
+        if len(c) < 100:           
+            continue
         clean_chunks.append(c)
     print(f"Number of clean chunks: {len(clean_chunks)}")
 
-    if not clean_chunks:
-        return "No valid text chunks found in the provided PDF."
-    
     model = SentenceTransformer("all-MiniLM-L6-v2")
     index, embeddings, chunks_for_index = build_vectorstore(clean_chunks)
     print("Vector store created.")
 
-    top_chunks_with_dist = search(query, model, index, chunks_for_index, k=top_k)
-    # top_chunks = [c for c, dist in top_chunks_with_dist if dist < 0.85]
-    filtered = [(c, dist) for c, dist in top_chunks_with_dist if dist < 0.85]
-
-    if not filtered:
-       return "No relevant clinical context found for this term."
-    
-    prompt = f"""
-    You are a medical expert in urology.
-
-    Using ONLY the information provided below,
-    write a concise and clinically accurate definition
-    for the following term.
-
-    Term:
-    {query}
-
-    Context:
-    {top_chunks_text}
-
-    Definition:
-    """
-
-    # definition = generate_definition(prompt)
-
-    definition = generate_definition(prompt)
-
-    return definition
-
-if __name__ == "__main__":
-    query = "Benign prostatic hyperplasia"
-    definition = rag_generate_definition(query)
-    print(f"\nDefinition for '{query}':\n{definition}")
+    top_chunks = search(query, model, index, chunks_for_index, k=top_k)
+    top_chunks_text = "\n\n".join(top_chunks)
