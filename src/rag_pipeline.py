@@ -3,6 +3,7 @@ from chunkovi import chunk_text
 from vector_store import build_vectorstore, search
 from hf_api_llm import generate_definition
 from sentence_transformers import SentenceTransformer
+import re
 
 def rag_generate_definition(query, pdf_folder="data/raw", top_k=5):
     """
@@ -36,12 +37,33 @@ def rag_generate_definition(query, pdf_folder="data/raw", top_k=5):
             continue
         if len(c) < 100:           
             continue
+        c = re.sub(r"\s+", " ", c)
+        c = re.sub(r"[^a-zA-Z0-9 .,]", "", c)
         clean_chunks.append(c)
     print(f"Number of clean chunks: {len(clean_chunks)}")
 
+    if not clean_chunks:
+        return "No valid text chunks found in the provided PDF."
     model = SentenceTransformer("all-MiniLM-L6-v2")
     index, embeddings, chunks_for_index = build_vectorstore(clean_chunks)
     print("Vector store created.")
 
-    top_chunks = search(query, model, index, chunks_for_index, k=top_k)
+    top_chunks_with_dist = search(query, model, index, chunks_for_index, k=top_k)
+    top_chunks = [c for c, dist in top_chunks_with_dist if dist < 0.85]
     top_chunks_text = "\n\n".join(top_chunks)
+
+    prompt = f"""
+        You are a medical expert in urology.
+
+        Using ONLY the information provided below,
+        write a concise and clinically accurate definition
+        for the following term.
+
+    Term: {query}
+
+    Context:{top_chunks_text}
+
+    Definition:
+    """
+    definition = generate_definition(prompt)
+    return definition

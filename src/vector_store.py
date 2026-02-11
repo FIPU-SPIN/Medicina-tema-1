@@ -18,11 +18,11 @@ def search(query, model, index, chunks, k=5):
     results = []
 
     for d, i in zip(distances[0], indices[0]):
-        # print("DIST:", d)
-        # print(chunks[i][:300])
-        # print("-"*60)
-        chunk = chunks[i]
-        results.append((chunk, float(d)))
+        print("DIST:", d)
+        print(chunks[i][:300])
+        print("-"*60)
+        # chunk = chunks[i]
+        # results.append((chunk, float(d)))
 
-    # results = [chunks[i] for i in indices[0]]
+    results = [chunks[i] for i in indices[0]]
     return results
