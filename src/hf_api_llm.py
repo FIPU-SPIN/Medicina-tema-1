@@ -9,7 +9,7 @@ class MedicalDefinitionGenerator:
     def __init__(self):
         
         self.client = InferenceClient(api_key=os.environ.get("HF_TOKEN"), bill_to="CPUI")
-        self.model = "Qwen/Qwen3-235B-A22B-Instruct-2507"
+        self.model = "nvidia/NVIDIA-Nemotron-Nano-9B-v2"
         self.fallback_model = "tiiuae/falcon-7b-instruct"
         
         print(f"Using primary model: {self.model}")
