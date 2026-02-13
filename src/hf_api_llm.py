@@ -9,7 +9,7 @@ class MedicalDefinitionGenerator:
     def __init__(self):
         
         self.client = InferenceClient(api_key=os.environ.get("HF_TOKEN"), bill_to="CPUI")
-        self.model = "Llama 3.1 8B"
+        self.model = "openai/gpt-oss-20bWhat is punctiform prostatic calculi?"
         self.fallback_model = "tiiuae/falcon-7b-instruct"
         
         print(f"Using primary model: {self.model}")
