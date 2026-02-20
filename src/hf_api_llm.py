@@ -26,7 +26,7 @@ Term: {term}
 
 Tekst:
 {chunk}
-
+pip
 Definition:"""
 
         messages = [
