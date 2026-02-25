@@ -2,6 +2,7 @@ import os
 import pandas as pd
 from bert_score import score
 from sentence_transformers import SentenceTransformer, util
+from pathlib import Path
 
 def get_next_filename(base_path, base_name):
     version = 1
@@ -89,18 +90,11 @@ correlation_matrix.to_excel(corr_output)
 
 print(f"Correlation matrix saved to {corr_output}")
 
-"""
-# =====================================================
-# DODATNE STATISTIKE, IQR I ROBUST RANGIRANJE
-# =====================================================
+#novo 
 
 print("\nDodajem dodatne statistike, IQR i robust ranking...")
 
 analiza_df = df.copy()
-
-# -----------------------
-# MEDIAN + IQR PO MODELU
-# -----------------------
 
 iqr_stats = analiza_df.groupby('model_name').agg(
     median_bert_F1=('bert_F1', 'median'),
@@ -110,10 +104,6 @@ iqr_stats = analiza_df.groupby('model_name').agg(
     median_combined=('combined_score', 'median'),
     iqr_combined=('combined_score', lambda x: x.quantile(0.75) - x.quantile(0.25))
 ).round(4)
-
-# -----------------------
-# KLASIČNI RANKING (MEAN)
-# -----------------------
 
 ranking_mean = analiza_df.groupby('model_name').agg(
     avg_bert_F1=('bert_F1', 'mean'),
@@ -133,10 +123,6 @@ ranking_mean['overall_rank_mean'] = (
 
 ranking_mean = ranking_mean.sort_values('overall_rank_mean')
 
-# -----------------------
-# ROBUST RANKING (MEDIAN)
-# -----------------------
-
 ranking_median = analiza_df.groupby('model_name').agg(
     median_bert_F1=('bert_F1', 'median'),
     median_cosine_cBERT=('cosine_cBERT', 'median'),
@@ -155,15 +141,7 @@ ranking_median['overall_rank_median'] = (
 
 ranking_median = ranking_median.sort_values('overall_rank_median')
 
-# -----------------------
-# BROJ PRIMJERA
-# -----------------------
-
 sample_count = analiza_df.groupby('model_name').size().reset_index(name='num_samples')
-
-# -----------------------
-# GLOBALNA USPOREDBA
-# -----------------------
 
 metric_comparison = pd.DataFrame({
     'metric': ['bert_F1', 'cosine_cBERT', 'combined_score'],
@@ -194,12 +172,6 @@ metric_comparison = pd.DataFrame({
     ]
 }).round(4)
 
-# -----------------------
-# SPREMANJE
-# -----------------------
-
-from pathlib import Path
-
 output_dir = Path('data/processed')
 output_dir.mkdir(parents=True, exist_ok=True)
 
@@ -218,4 +190,3 @@ print("  - Klasični ranking (mean)")
 print("  - Robust ranking (median)")
 print("  - Broj primjera")
 print("  - Globalna usporedba metrika")
-"""
