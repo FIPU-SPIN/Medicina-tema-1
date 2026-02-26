@@ -1,0 +1,22 @@
+// LLM Interpretation Workflow
+digraph {
+	fontname=Helvetica fontsize=12 nodesep=0.5 rankdir=TB ranksep=0.8
+	node [color="#AED6F1" dpi=96 fixedsize=false fontname=Helvetica fontsize=11 height=0 margin="0.2,0.2" shape=box style=filled width=2]
+	A [label="
+Clinical Reports (raw)"]
+	B [label="Extraction of Clinical Findings"]
+	C [label="Retrieval of Validated Medical References"]
+	D [label="Prompt Construction
+(finding + retrieved context)"]
+	E [label="LLM Interpretation Generation"]
+	F [label="Structured Output Storage
+(input, retrieval, interpretation, reference)"]
+	G [label="Automated & Manual Evaluation"]
+	edge [color="#34495E" penwidth=2]
+	A -> B
+	B -> C
+	C -> D
+	D -> E
+	E -> F
+	F -> G
+}
